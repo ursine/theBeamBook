@@ -1,5 +1,5 @@
 [[CH-BEAM]]
-== The Erlang Virtual Machine: BEAM 
+== The Erlang Virtual Machine: BEAM
 
 BEAM (Bogumil's/Bj&ouml;rn's Abstract Machine) is the machine that executes
 the code in the Erlang Runtime System. It is a garbage collecting,
@@ -15,9 +15,9 @@ executes the code is vital to be able to profile and tune your
 code.
 
 The BEAM design influences large parts of the rest of ERTS. The
-primitives for scheduling infuences the Scheduler
+primitives for scheduling influences the Scheduler
 (xref:CH-Scheduling[]), the representation of Erlang terms and the
-interaction with the memory infuences the Garbage Collector
+interaction with the memory influences the Garbage Collector
 (xref:CH-Memory[]). By understanding the basic design of BEAM you
 will more easily understand the implementations of these other
 components.
@@ -30,7 +30,7 @@ stack machine, the BEAM is a register machine loosely based on WAM
 first pushed to the working stack, then the instruction pops its
 arguments and then it pushes the result on the stack.
 
-Stack machines are quite popular among virtual machine- and
+Stack machines are quite popular among virtual machine and
 programming language implementers since they are quite easy to
 generate code for, and the code becomes very compact. The compiler
 does not need to do any register allocation, and most operations do
@@ -92,16 +92,15 @@ Great, you have built your first virtual machine! Handling
 subtraction, division and the rest of the Erlang language is left as
 an exercise for the reader.
 
-
 Anyway, the BEAM is *not* a stack machine, it is a _register machine_.
 In a register machine instruction operands are stored in registers
-instead of the stack, and the result of an operation usually end up
+instead of the stack, and the result of an operation usually ends up
 in a specific register.
 
 Most register machines do still have a stack used for passing arguments
 to functions and saving return addresses. BEAM has both a stack and
 registers, but just as in WAM the stack slots are accessible through
-registers called Y-registers. BEAM also have a number of X-registers, 
+registers called Y-registers. BEAM also has a number of X-registers,
 and a special register X0 (sometimes also called R0) which works as
 an accumulator where results are stored.
 
@@ -111,7 +110,7 @@ and register X0 is used for the return value.
 The X registers are stored in a C-array in the BEAM emulator and they
 are globally accessible from all functions. The X0 register is cached
 in a local variable mapped to a physical machine register in the native
-machine on most architectures. 
+machine on most architectures.
 
 The Y registers are stored in the stack frame of the caller and only
 accessible by the calling functions. To save a value across a function
@@ -119,10 +118,12 @@ call BEAM allocates a stack slot for it in the current stack frame and
 then moves the value to a Y register.
 
 [[x_and_y_regs_in_memory]]
+.X and Y Registers in Memory
+[shaape]
 ----
   hend ->  +----+    -
-           |....| 
-  (fp) ->  | AN | 
+           |....|
+  (fp) ->  | AN |
   (y0) ->  |    |
   (y1) ->  |    |
   stop ->  |    |
@@ -141,6 +142,10 @@ then moves the value to a Y register.
       X1   |    |
      (X0)  |    |
            +----+
+
+options:
+ - ".*": {fill: [[0.7, 0.7, 0.7], no-shadow], frame: [[0.9, 0.9, 0.9], line]}
+ - ".*": {text : ["Monospace 10", no-shadow]}
 ----
 
 Let us compile the following program with the _'S'_ flag:
@@ -184,7 +189,7 @@ _{move,{x,1},{y,0}}_ (read as move x1 to y0 or in imperative style: y0
 The id function (at label f4) is then called by 
 _{call,1,{f,4}}_. (We will come back to what the argument "1" stands for later.)
 Then the result of the call (now in X0)
-need to be saved on the stack (Y0), but the argument _B_
+needs to be saved on the stack (Y0), but the argument _B_
 is saved in Y0 so the BEAM does a bit of shuffling:
 
 Except for the x and y registers, there are a number of special
@@ -538,7 +543,7 @@ Note that the star in "+goto+ +&#42;+" does not mean dereference, the
 expression means jump to an address pointer, we should really write it
 as "+goto&#42;+".
 
-Now imagine that the compile C code for these instructions end up at
+Now imagine that the compiled C code for these instructions end up at
 memory addresses 0x3000, 0x3100, and 0x3200. When the BEAM code is
 loaded the three move instructions in the code will be replaced by the
 memory addresses of the implementation of the instructions. Imagine
@@ -550,12 +555,12 @@ that the code (+{move,{x,0},{x,1}}, {move,{y,0},{x,0}},
                      /  0x1000: 0x3000 -> 0x3000: OpCase(move_xx): x(Arg(1)) = x(Arg(0))
 {move,{x,0},{x,1}}  {   0x1004: 0x0                                I += 3;
                      \  0x1008: 0x1                                Goto(*I);
-                     /  0x100c: 0x3200
-{move,{y,0},{x,0}}  {   0x1010: 0x1
-                     \  0x1014: 0x1
-                     /  0x1018: 0x3100
-{move,{y,0},{x,0}}  {   0x101c: 0x1
-                     \  0x1020: 0x1
+                     /  0x100c: 0x3100
+{move,{y,0},{x,0}}  {   0x1010: 0x0
+                     \  0x1014: 0x0
+                     /  0x1018: 0x3200
+{move,{x,1},{y,0}}  {   0x101c: 0x1
+                     \  0x1020: 0x0
 -------------------------------------------
 
 The word at address 0x1000 points to the implementation of
@@ -571,7 +576,7 @@ BEAM instructions and how they are implemented.
 Most modern multi-threading operating systems use preemptive scheduling.
 This means that the operating system decides when to switch from one
 process to another, regardless of what the process is doing. This protects
-the other processes from a processes misbehaving by not yielding in time.
+the other processes from a process misbehaving by not yielding in time.
 
 In cooperative multitasking which uses a non-preemptive scheduler the
 running process decides when to yield. This has the advantage that the
@@ -594,14 +599,15 @@ stack and heap.
 On the language level all processes are running concurrently and the
 programmer should not have to deal with explicit yields. BEAM solves
 this by keeping track of how long a process has been running. This is
-done by counting _reductions_. The term originaly comes from the
+done by counting _reductions_. The term originally comes from the
 mathematical term beta-reduction used in lambda calculus.
 
-The definition of a reduction in BEAM not very specific, but we can
+The definition of a reduction in BEAM is not very specific, but we can
 see it as a small piece of work, which shouldn't take _too long_.
-Each function call is counted as a reduction, and BEAM does a test
-upon entry to each function if the process has used up all its
-reductions.
+Each function call is counted as a reduction. BEAM does a test
+upon entry to each function to check whether the process has used up all its
+reductions or not. If there are reductions left the function is executed
+otherwise the process is suspended.
 
 Since there are no loops in Erlang, only tail-recursive function
 calls, it is very hard to write a program that does any significant

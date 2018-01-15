@@ -24,7 +24,11 @@ types, numbers have the sub types integer and float, and list has the
 subtypes nil and cons. (One could also argue that tuple has one
 subtype for each size.)
 
-The Erlang Type Lattice 
+The Erlang Type Lattice
+
+[[erlang_type_lattice]]
+.Erlang Type Lattice
+[shaape]
 ----
 
                                                   any()
@@ -36,6 +40,9 @@ The Erlang Type Lattice
       \      \              \         \        \   |   /      /       /        /     /    /
                                                   none()
 
+options:
+ - ".*": {fill: [[0.7, 0.7, 0.7], no-shadow], frame: [[0.9, 0.9, 0.9], line]}
+ - ".*": {text : ["Monospace 10", no-shadow]}
 ----
 
 There is a partial order (< and >) on all terms in Erlang where the
@@ -56,9 +63,9 @@ where all integers are considered smaller than all floats. If all the
 keys are the same then each value pair (in key order) is compared
 arithmetically, i.e. by first converting them to the same precision.
 
-The same is true when comparing for equality, thus #{1 => 1.0} == #{1 => 1} but #{1.0 => 1} /= #{1 => 1}.
+The same is true when comparing for equality, thus +#{1 => 1.0} == #{1 => 1} but #{1.0 => 1} /= #{1 => 1}+.
 
-In Erlang versions prior to 18 keys where also compared
+In Erlang versions prior to 18 keys were also compared
 arithmetically.
 
 Erlang is dynamically typed. That is, types will be checked at
@@ -135,7 +142,7 @@ space) and are stored on the heap, as boxed objects.
 
 By having all four tag bits as ones for small integers the emulator
 can make an efficient test when doing integer arithmetic to see if
-both arguments are immediates. (+is_both_small(x,y)+ is defined as 
+both arguments are immediates. (+is_both_small(x,y)+ is defined as
 +(x & y & 1111) == 1111+).
 
 The Immediate 2 tag is further divided like this:
@@ -193,8 +200,8 @@ word is filled with ones.
 
 ==== Tags for Boxed Terms
 
-Erlang terms stored on the heap uses several machine words. Lists, or
-cons cells, are just two consecutive words on the heap. The head and
+Erlang terms stored on the heap use several machine words. Lists, or
+cons cells, are just two consecutive words on the heap: the head and
 the tail (or car and cdr as they are called in lisp and some places in
 the ERTS code).
 
@@ -205,9 +212,10 @@ lists of Unicode code points. For strings in latin-1 there is no
 difference since latin-1 is a subset of Unicode.
 // Describe Unicode code points better. Is the subset thing true?
 
-The string "Hello" might look like this in memory:
+The string "hello" might look like this in memory:
 
-.Representation of the string "Hello" on a 32 bit machine.
+.Representation of the string "hello" on a 32 bit machine.
+[shaape]
 ----
 
  hend ->     +-------- -------- -------- --------+
@@ -218,9 +226,9 @@ The string "Hello" might look like this in memory:
                                                                                   |
  htop ->     |                                   |                                |
          132 |00000000 00000000 00000000 01111001| 120 + list tag  -------------- | -+
-         128 |00000000 00000000 00000110 10001111| (H) 104 bsl 4 + small int tag <+  |
+         128 |00000000 00000000 00000110 10001111| (h) 104 bsl 4 + small int tag <+  |
          124 |00000000 00000000 00000000 01110001| 112 + list tag  ----------------- | -+
-         120 |00000000 00000000 00000110 01011111| (e) 101 bsl 4 + small int tag <---+  | 
+         120 |00000000 00000000 00000110 01011111| (e) 101 bsl 4 + small int tag <---+  |
          116 |00000000 00000000 00000000 01110001| 112 + list tag  -------------------- | -+
          112 |00000000 00000000 00000110 11001111| (l) 108 bsl 4 + small int tag <------+  |
          108 |00000000 00000000 00000000 01110001|  96 + list tag  ----------------------- | -+
@@ -230,6 +238,9 @@ The string "Hello" might look like this in memory:
              |                ...                |
  heap ->     +-----------------------------------+
 
+options:
+ - ".*": {fill: [[0.7, 0.7, 0.7], no-shadow], frame: [[0.9, 0.9, 0.9], line]}
+ - ".*": {text : ["Monospace 10", no-shadow]}
 ----
 
 All other boxed terms start with a header word. The header word uses a
@@ -264,6 +275,7 @@ element in the following words. The empty tuple +{}+ is stored just as
 the word 0 (header tag 0, tuple tag 0000, and arity 0).
 
 .Representation of the tuple {104,101,108,108,111} on a 32 bit machine.
+[shaape]
 ----
 
  hend ->     +-------- -------- -------- --------+
@@ -276,23 +288,26 @@ the word 0 (header tag 0, tuple tag 0000, and arity 0).
          150 |00000000 00000000 00000110 11111111| (o) 111 bsl 4 + small int tag  |
          144 |00000000 00000000 00000110 11001111| (l) 108 bsl 4 + small int tag  |
          140 |00000000 00000000 00000110 11001111| (l) 108 bsl 4 + small int tag  |
-         136 |00000000 00000000 00000110 01011111| (e) 101 bsl 4 + small int tag  | 
-         132 |00000000 00000000 00000110 10001111| (H) 104 bsl 4 + small int tag  |
-         128 |00000000 00000000 00000000 10100000| 5 bsl 6 + tuple & header tag <-+
+         136 |00000000 00000000 00000110 01011111| (e) 101 bsl 4 + small int tag  |
+         132 |00000000 00000000 00000110 10001111| (h) 104 bsl 4 + small int tag  |
+         128 |00000000 00000000 00000001 01000000| 5 bsl 6 + tuple & header tag <-+
              |                ...                |
  heap ->     +-----------------------------------+
 
+options:
+ - ".*": {fill: [[0.7, 0.7, 0.7], no-shadow], frame: [[0.9, 0.9, 0.9], line]}
+ - ".*": {text : ["Monospace 10", no-shadow]}
 ----
 
-A _binary_ is an imutable array of bytes. There are four types of
+A _binary_ is an immutable array of bytes. There are four types of
 internal representations of _binaries_. The two types _heap binaries_
 and _refc binaries_ contains binary data. The other two types, _sub
-binaries_ and _match contexts_ (the BINARY_AGREGATE tag) are smaller
+binaries_ and _match contexts_ (the BINARY_AGGREGATE tag) are smaller
 references into one of the other two types.
 
 Binaries that are 64 bytes or less can be stored directly on the
 process heap as _heap binaries_. Larger binaries are reference
-counted and the paylod is stored outside of the process heap, a
+counted and the payload is stored outside of the process heap, a
 reference to the payload is stored on the process heap in an object
 called a _ProcBin_.
 
@@ -310,7 +325,7 @@ numbers).
 TODO: Describe bignum encoding. (And arithmetic ?)
 
 A reference is a _"unique"_ term often used to tag messages in order
-to basically implement a channel over a process mailbox. A references
+to basically implement a channel over a process mailbox. A reference
 is implemented as an 82 bit counter. After 9671406556917033397649407
 calls to +make_ref+ the counter will wrap and start over with ref 0
 again. You need a really fast machine to do that many calls to
@@ -326,7 +341,7 @@ heap.
 .Representation of a ref in a 32-bit (or half-word) system.
 ----
 
-    |00000000 00000000 00000000 11010000| Arity 3 + ref tag 
+    |00000000 00000000 00000000 11010000| Arity 3 + ref tag
     |00000000 000000rr rrrrrrrr rrrrrrrr| Data0
     |rrrrrrrr rrrrrrrr rrrrrrrr rrrrrrrr| Data1
     |rrrrrrrr rrrrrrrr rrrrrrrr rrrrrrrr| Data2
@@ -347,8 +362,3 @@ The reference number is (Data2 bsl 50) + (Data1 bsl 18) + Data0.
 
  Outro/conclusion
 ****
-
-
-
-
-

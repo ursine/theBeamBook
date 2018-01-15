@@ -1,6 +1,5 @@
-
 [[AP-listings]]
-== Appendix B: Full Code Listings
+== Full Code Listings
 
 [source,erlang]
 ----
@@ -26,6 +25,12 @@ include::../code/compiler_chapter/src/json_parser.erl[]
 ----
 include::../code/compiler_chapter/src/json_test.erl[]
 ----
+
+[source,erlang]
+----
+include::../code/processes_chapter/src/msg.erl[]
+----
+
 
 [source,erlang]
 ----
@@ -74,6 +79,20 @@ Load Balancer.
 ----
 include::../code/memory_chapter/src/lb.erl[]
 ----
+
+[[listing-show]]
+show.
+
+[source,erlang]
+----
+include::../code/type_system_chapter/src/show.erl[]
+----
+
+[source,c]
+----
+include::../code/building_chapter/hipe_debug.patch[]
+----
+
 
 // [[listing-lbS]]
 // [source,beam]
